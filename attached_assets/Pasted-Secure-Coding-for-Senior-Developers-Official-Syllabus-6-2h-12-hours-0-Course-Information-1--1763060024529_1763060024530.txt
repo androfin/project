@@ -1,0 +1,44 @@
+Secure Coding for Senior Developers — Official Syllabus (6×2h = 12 hours)
+0. Course Information
+1.	0.1 Title: Secure Coding for Senior Developers
+2.	0.2 Duration & Format: 12 hours total, 6 sessions × 2 hours
+3.	0.3 Audience: Senior software engineers / tech leads (web, API, microservices)
+4.	0.4 Prerequisites: Proficiency in at least one backend language, Git, containers; basic CI/CD familiarity
+5.	0.5 Learning Outcomes:
+•	Design secure web/API architectures (microservices & serverless)
+•	Prevent injection/XSS via validation, encoding, and safe query construction
+•	Implement robust authn/authz/session patterns; avoid IDOR/logic flaws
+•	Integrate SCA/SAST/DAST into CI/CD with risk-based gating
+•	Apply supply-chain & secrets-management practices
+•	Perform focused threat modeling and secure code reviews
+1. Session 1 — Security Mindset, Web Architecture & HTTP Foundations (2h)
+•	1.1 Security Mindset & Threat Landscape (15m)
+•	1.1.1 Assets, attackers, and abuse-case thinking
+•	1.1.2 Trust boundaries, data flows and classification
+•	1.1.3 OWASP Top 10
+•	1.1.4 STRIDE framework & STRIDE-lite for web APIs 1.2.5
+•	1.2 Web Architecture Refresher (25m)
+•	1.2.1 Monolith → microservices → serverless patterns
+•	1.2.2 API gateways, service mesh, east–west traffic
+•	1.2.3 Typical failure modes & attack surface
+•	1.3 HTTP/S Fundamentals (20m)
+•	1.3.1 Request/response model, statelessness
+•	1.3.2 TLS/SSL roles, modern cipher suites, certificate hygiene
+•	1.3.3 HSTS preload; operational considerations
+•	1.4 HTTP Security Headers Deep Dive (25m)
+•	1.4.1 CSP: nonces vs hashes, strict-dynamic, report-only
+•	1.4.2 HSTS, Referrer-Policy, Permissions-Policy, X-Frame-Options
+•	1.4.3 Rollout & monitoring strategies
+•	1.6 Lab 1 (15m) l need hep replit!
+•	1.6.1 Enable TLS; add HSTS & CSP (report-only); validate via curl/devtools replit this is important
+•	1.7 Quiz 1 (10m)
+
+
+
+l have such porject which here l should create lab app for session content practice student there but l need to how l do for example for the topic. code language not matter the importnat developers choice. If you are basing the labs on bWAPP or a specific web app, use whatever language is in the source code of the app and about lab task story something (for example) An idea could be (for example) to use the BWAPP app for XXS or SQLi - have the learner first of all identify a vulnerable SQL query and produce a proof of concept by executing SQL injection in the app and extracting some data. Then identify where in the source code the vulnerability lives and suggest a fix (e.g. switch string concatenation for parameterized query) and present the fixed code
+
+
+
+
+start help me from the first topic! 
+1. Session 1 — Security Mindset, Web Architecture & HTTP Foundations (2h)

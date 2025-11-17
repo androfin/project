@@ -1,0 +1,84 @@
+Topic 1
+2h
+~30 minutes
+Security Mindset, Web Architecture & HTTP Foundations
+
+Subparts covered:
+
+    1.1.1 Assets, attackers, and abuse-case thinking
+    1.1.2 Trust boundaries, data flows and classification
+    1.1.3 OWASP Top 10
+    1.1.4 STRIDE framework & STRIDE-lite for web APIs
+
+Securing TechMart - HTTP Security Headers Mission
+
+TechMart's e-commerce platform was recently flagged by security auditors for missing critical HTTP security headers. Your mission: implement security headers to protect against XSS, clickjacking, and protocol downgrade attacks.
+
+How to Use This Lab:
+
+    Read the Instructions: Review the scenario and mission in the "Instructions" tab below
+    Study the Vulnerable Code: Examine the code in the editor - identify security flaws
+    Fix the Security Issues: Edit the code directly in the text editor to implement secure solutions
+    Use Hints if Needed: Progressive hints are available in the Instructions tab
+    Click "Validate": Press the green "Validate" button above the code editor to check your solution
+    Review Results: See your score and specific feedback in the right panel
+
+**Story**: You're a security engineer at TechMart, an online electronics store. A recent pen-test revealed that the application is vulnerable to XSS attacks and clickjacking because of missing security headers.
+
+**Your Mission**:
+1. **Analyze** the vulnerable server configuration below
+2. **Test** what happens without security headers (the app loads any external scripts!)
+3. **Implement** the following security headers:
+   - Content-Security-Policy (CSP) to prevent XSS
+   - Strict-Transport-Security (HSTS) to enforce HTTPS
+   - X-Frame-Options to prevent clickjacking
+   - X-Content-Type-Options to prevent MIME sniffing
+
+**Expected Solution**: Add a middleware function that sets these headers on all responses. Use helmet.js or set headers manually.
+
+Hints (Progressive Difficulty):
+
+    Hint 1: Install helmet.js with 'npm install helmet' and use app.use(helmet()) for quick security
+    Hint 2: For manual implementation, use app.use() middleware: res.setHeader('Header-Name', 'value')
+    Hint 3: CSP syntax: "default-src 'self'; script-src 'self'; style-src 'self'"
+    Hint 4: HSTS should include: max-age=31536000; includeSubDomains; preload
+    Hint 5: X-Frame-Options should be 'DENY' to completely block framing
+    SOLUTION: Use helmet.js middleware OR set all 4 headers manually with proper values
+
+Code Editor - Edit Below to Fix Vulnerabilities
+const express = require('express');
+const app = express();
+
+// TechMart E-commerce API - VULNERABLE VERSION
+app.use(express.json());
+
+app.get('/', (req, res) => {
+  // Homepage loads without any security headers!
+  res.send(`
+    <h1>Welcome to TechMart</h1>
+    <script src="https://untrusted-cdn.com/malicious.js"></script>
+    <p>Shop our latest products</p>
+  `);
+});
+
+app.get('/api/products', (req, res) => {
+  res.json([
+    { id: 1, name: 'Laptop', price: 999 },
+    { id: 2, name: 'Phone', price: 699 }
+  ]);
+});
+
+app.listen(3000, () => {
+  console.log('TechMart running on http://localhost:3000');
+});
+
+// PROBLEM: No security headers = vulnerable to:
+// - XSS (malicious scripts can load from anywhere)
+// - Clickjacking (site can be embedded in iframes)
+// - Protocol downgrade attacks (no HTTPS enforcement)
+
+Ready to Validate?
+
+Edit the vulnerable code in the editor, then click the green "Validate Solution" button to check your implementation.
+
+Your results will appear here with detailed feedback.

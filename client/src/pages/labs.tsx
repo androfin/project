@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Code, CheckCircle2, Circle, Target } from "lucide-react";
+import { Code, CheckCircle2, Circle, Trophy } from "lucide-react";
 import type { Topic, LabProgress } from "@shared/schema";
 
 export default function Labs() {
@@ -86,8 +86,8 @@ export default function Labs() {
                     >
                       {isCompleted ? (
                         <>
-                          <Target className="w-4 h-4 mr-2" />
-                          Review
+                          <Trophy className="w-4 h-4 mr-2" />
+                          Retake
                         </>
                       ) : (
                         <>

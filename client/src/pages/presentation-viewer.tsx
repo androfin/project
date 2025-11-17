@@ -50,10 +50,11 @@ export default function PresentationViewer() {
 
   const markAsReadMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", `/api/read-confirmations/${topicId}`, {});
+      await apiRequest("POST", `/api/topics/${topicId}/read`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/read-confirmations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/topics"] });
       toast({
         title: "Marked as read",
         description: "Presentation marked as completed",

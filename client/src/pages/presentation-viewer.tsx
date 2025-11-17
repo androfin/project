@@ -151,26 +151,18 @@ export default function PresentationViewer() {
     uploadPPTMutation.mutate({ pptUrl: pptUrl.trim(), pptFileName: pptFileName.trim() });
   };
 
-  const handleGetUploadParameters = async () => {
-    const response = await apiRequest("POST", "/api/objects/upload", {});
-    const data = await response.json();
-    return data;
-  };
-
   const handleFileUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
     if (result.successful && result.successful.length > 0) {
       const uploadedFile = result.successful[0];
       const fileName = uploadedFile.name;
-      const uploadURL = uploadedFile.uploadURL as string;
+      const response = uploadedFile.response?.body as any;
       
-      // Normalize the upload URL to get a stable /objects/ path
-      const response = await apiRequest("POST", "/api/objects/normalize", { url: uploadURL });
-      const { normalizedPath } = await response.json();
-      
-      uploadPPTMutation.mutate({ 
-        pptUrl: normalizedPath, 
-        pptFileName: fileName 
-      });
+      if (response?.filePath) {
+        uploadPPTMutation.mutate({ 
+          pptUrl: response.filePath, 
+          pptFileName: fileName 
+        });
+      }
     }
   };
 
@@ -266,13 +258,66 @@ export default function PresentationViewer() {
               </CardHeader>
               <CardContent>
                 <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-4">
-                  <iframe
-                    src={`https://docs.google.com/viewer?url=${encodeURIComponent(new URL(topic.pptUrl, window.location.origin).href)}&embedded=true`}
-                    className="w-full h-full rounded-md"
-                    title="Presentation"
-                    allowFullScreen
-                    data-testid="iframe-presentation"
-                  />
+                  {(() => {
+                    const isPDF = topic.pptFileName?.toLowerCase().endsWith('.pdf') || topic.pptUrl.toLowerCase().endsWith('.pdf');
+                    const isPPTX = topic.pptFileName?.toLowerCase().match(/\.(pptx?|ppt)$/i) || topic.pptUrl.toLowerCase().match(/\.(pptx?|ppt)$/i);
+                    const isLocalFile = topic.pptUrl.startsWith('/objects/');
+                    const isGoogleSlides = topic.pptUrl.includes('docs.google.com/presentation');
+                    
+                    if (isLocalFile && isPDF) {
+                      return (
+                        <iframe
+                          src={topic.pptUrl}
+                          className="w-full h-full rounded-md"
+                          title="Presentation PDF"
+                          data-testid="iframe-presentation"
+                        />
+                      );
+                    } else if (isLocalFile && isPPTX) {
+                      return (
+                        <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
+                          <FileText className="w-16 h-16 text-primary" />
+                          <div>
+                            <h3 className="font-semibold mb-2">Presentation File Available</h3>
+                            <p className="text-sm text-muted-foreground mb-4">
+                              {topic.pptFileName || 'Presentation file'}
+                            </p>
+                            <p className="text-xs text-muted-foreground mb-4">
+                              Note: PPTX files cannot be previewed in browser. Download the file to view it in PowerPoint.
+                            </p>
+                            <a
+                              href={topic.pptUrl}
+                              download={topic.pptFileName}
+                              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+                            >
+                              Download Presentation
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    } else if (isGoogleSlides) {
+                      const embedUrl = topic.pptUrl.replace('/edit', '/embed').replace('/view', '/embed');
+                      return (
+                        <iframe
+                          src={embedUrl}
+                          className="w-full h-full rounded-md"
+                          title="Google Slides Presentation"
+                          allowFullScreen
+                          data-testid="iframe-presentation"
+                        />
+                      );
+                    } else {
+                      return (
+                        <iframe
+                          src={`https://docs.google.com/viewer?url=${encodeURIComponent(topic.pptUrl)}&embedded=true`}
+                          className="w-full h-full rounded-md"
+                          title="Presentation"
+                          allowFullScreen
+                          data-testid="iframe-presentation"
+                        />
+                      );
+                    }
+                  })()}
                 </div>
 
                 {!isRead && (
@@ -299,7 +344,6 @@ export default function PresentationViewer() {
                     <ObjectUploader
                       maxNumberOfFiles={1}
                       maxFileSize={50 * 1024 * 1024}
-                      onGetUploadParameters={handleGetUploadParameters}
                       onComplete={handleFileUploadComplete}
                       buttonClassName="w-full"
                     >
@@ -367,7 +411,6 @@ export default function PresentationViewer() {
                   <ObjectUploader
                     maxNumberOfFiles={1}
                     maxFileSize={50 * 1024 * 1024}
-                    onGetUploadParameters={handleGetUploadParameters}
                     onComplete={handleFileUploadComplete}
                     buttonClassName="w-full"
                   >

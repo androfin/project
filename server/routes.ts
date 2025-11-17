@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload PPT for a topic (using direct file upload)
+  // Upload PPT for a topic (supports both file upload and linking existing file)
   app.post("/api/topics/:topicId/ppt", isAdmin, upload.single('pptFile'), async (req, res) => {
     try {
       const topicId = parseInt(req.params.topicId);
@@ -137,13 +137,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid topic ID" });
       }
 
-      if (!req.file) {
-        return res.status(400).json({ error: "No PPT file uploaded" });
-      }
+      let pptUrl: string;
+      let pptFileName: string;
 
-      // Save the file and get its path
-      const pptUrl = await objectStorageService.saveFile(req.file);
-      const pptFileName = req.file.originalname;
+      // Check if a file was uploaded
+      if (req.file) {
+        // Save the file and get its path
+        pptUrl = await objectStorageService.saveFile(req.file);
+        pptFileName = req.file.originalname;
+      } 
+      // Otherwise, check for JSON data with file path
+      else if (req.body.pptUrl && req.body.pptFileName) {
+        pptUrl = req.body.pptUrl;
+        pptFileName = req.body.pptFileName;
+      } 
+      else {
+        return res.status(400).json({ error: "No PPT file uploaded or file path provided" });
+      }
 
       const topic = await storage.updateTopicPPT(topicId, pptUrl, pptFileName);
       res.json(topic);

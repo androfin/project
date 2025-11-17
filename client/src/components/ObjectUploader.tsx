@@ -1,23 +1,17 @@
-// Referenced from blueprint:javascript_object_storage
 import { useState } from "react";
 import type { ReactNode } from "react";
 import Uppy from "@uppy/core";
 import { DashboardModal } from "@uppy/react";
-import AwsS3 from "@uppy/aws-s3";
+import XHRUpload from "@uppy/xhr-upload";
 import type { UploadResult } from "@uppy/core";
 import { Button } from "@/components/ui/button";
 
-// Uppy v5 CSS imports (new paths)
 import "@uppy/core/css/style.min.css";
 import "@uppy/dashboard/css/style.min.css";
 
 interface ObjectUploaderProps {
   maxNumberOfFiles?: number;
   maxFileSize?: number;
-  onGetUploadParameters: () => Promise<{
-    method: "PUT";
-    url: string;
-  }>;
   onComplete?: (
     result: UploadResult<Record<string, unknown>, Record<string, unknown>>
   ) => void;
@@ -27,8 +21,7 @@ interface ObjectUploaderProps {
 
 export function ObjectUploader({
   maxNumberOfFiles = 1,
-  maxFileSize = 50 * 1024 * 1024, // 50MB default for PPTX files
-  onGetUploadParameters,
+  maxFileSize = 50 * 1024 * 1024,
   onComplete,
   buttonClassName,
   children,
@@ -43,11 +36,13 @@ export function ObjectUploader({
       },
       autoProceed: false,
     })
-      .use(AwsS3, {
-        shouldUseMultipart: false,
-        getUploadParameters: onGetUploadParameters,
+      .use(XHRUpload, {
+        endpoint: '/api/objects/upload',
+        formData: true,
+        fieldName: 'file',
+        method: 'POST',
       })
-      .on("complete", (result) => {
+      .on("complete", (result: any) => {
         onComplete?.(result);
         setShowModal(false);
       })

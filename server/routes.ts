@@ -1,4 +1,4 @@
-import type { Express, Request } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, isAdmin } from "./auth";
@@ -639,6 +639,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching system info:", error);
       res.status(500).json({ error: "Failed to fetch system information" });
     }
+  });
+
+  // ============ ERROR HANDLING MIDDLEWARE ============
+  // These must be registered AFTER all routes
+
+  // 404 handler for API routes
+  app.use('/api/*', (req: Request, res: Response) => {
+    res.status(404).json({
+      error: 'Endpoint not found',
+      path: req.path,
+      method: req.method,
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Global error handler
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('Unhandled error:', err);
+    
+    const status = err.status || err.statusCode || 500;
+    const message = process.env.NODE_ENV === 'production' 
+      ? 'Internal Server Error' 
+      : err.message || "Internal Server Error";
+    
+    const errorResponse: any = {
+      error: message,
+      status: status,
+      timestamp: new Date().toISOString(),
+    };
+    
+    // Include stack trace in development
+    if (process.env.NODE_ENV === 'development' && err.stack) {
+      errorResponse.stack = err.stack;
+    }
+    
+    // Include validation errors if available
+    if (err.errors) {
+      errorResponse.details = err.errors;
+    }
+    
+    res.status(status).json(errorResponse);
   });
 
   const httpServer = createServer(app);

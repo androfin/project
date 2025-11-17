@@ -200,46 +200,6 @@ app.get('/', (_req: Request, res: Response) => {
   });
 });
 
-// ============ ERROR HANDLING MIDDLEWARE ============
-
-// 404 handler for API routes
-app.use('/api/*', (req: Request, res: Response) => {
-  res.status(404).json({
-    error: 'Endpoint not found',
-    path: req.path,
-    method: req.method,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Global error handler
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('Unhandled error:', err);
-  
-  const status = err.status || err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'production' 
-    ? 'Internal Server Error' 
-    : err.message || "Internal Server Error";
-  
-  const errorResponse: any = {
-    error: message,
-    status: status,
-    timestamp: new Date().toISOString(),
-  };
-  
-  // Include stack trace in development
-  if (process.env.NODE_ENV === 'development' && err.stack) {
-    errorResponse.stack = err.stack;
-  }
-  
-  // Include validation errors if available
-  if (err.errors) {
-    errorResponse.details = err.errors;
-  }
-  
-  res.status(status).json(errorResponse);
-});
-
 // ============ APPLICATION STARTUP ============
 
 (async () => {

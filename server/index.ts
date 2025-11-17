@@ -31,7 +31,7 @@ app.use(helmet({
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
+      frameSrc: ["'self'", "https://docs.google.com"], // Allow Google Docs/Slides embedding
     },
   },
   crossOriginEmbedderPolicy: false, // Disable for development

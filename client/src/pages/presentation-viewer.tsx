@@ -259,31 +259,34 @@ export default function PresentationViewer() {
               <CardContent>
                 <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-4">
                   {(() => {
-                    const isPDF = topic.pptFileName?.toLowerCase().endsWith('.pdf') || topic.pptUrl.toLowerCase().endsWith('.pdf');
-                    const isPPTX = topic.pptFileName?.toLowerCase().match(/\.(pptx?|ppt)$/i) || topic.pptUrl.toLowerCase().match(/\.(pptx?|ppt)$/i);
+                    const urlLower = topic.pptUrl.toLowerCase().trim();
+                    const fileNameLower = (topic.pptFileName || '').toLowerCase().trim();
+                    
+                    const isPDF = urlLower.endsWith('.pdf') || fileNameLower.endsWith('.pdf');
+                    const isPPTX = /\.(pptx?|ppt)$/i.test(urlLower) || /\.(pptx?|ppt)$/i.test(fileNameLower);
                     const isLocalFile = topic.pptUrl.startsWith('/objects/');
                     const isGoogleSlides = topic.pptUrl.includes('docs.google.com/presentation');
                     
-                    if (isLocalFile && isPDF) {
+                    if (isPDF && isLocalFile) {
                       return (
                         <iframe
                           src={topic.pptUrl}
                           className="w-full h-full rounded-md"
-                          title="Presentation PDF"
+                          title="PDF Presentation"
                           data-testid="iframe-presentation"
                         />
                       );
-                    } else if (isLocalFile && isPPTX) {
+                    } else if (isPPTX && isLocalFile) {
                       return (
                         <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
                           <FileText className="w-16 h-16 text-primary" />
                           <div>
-                            <h3 className="font-semibold mb-2">Presentation File Available</h3>
+                            <h3 className="font-semibold mb-2">PowerPoint File Available</h3>
                             <p className="text-sm text-muted-foreground mb-4">
                               {topic.pptFileName || 'Presentation file'}
                             </p>
                             <p className="text-xs text-muted-foreground mb-4">
-                              Note: PPTX files cannot be previewed in browser. Download the file to view it in PowerPoint.
+                              Note: PowerPoint files (.pptx, .ppt) cannot be previewed in the browser. Download the file to view it.
                             </p>
                             <a
                               href={topic.pptUrl}
@@ -296,7 +299,12 @@ export default function PresentationViewer() {
                         </div>
                       );
                     } else if (isGoogleSlides) {
-                      const embedUrl = topic.pptUrl.replace('/edit', '/embed').replace('/view', '/embed');
+                      let embedUrl = topic.pptUrl;
+                      if (embedUrl.includes('/edit') || embedUrl.includes('/view')) {
+                        embedUrl = embedUrl.replace('/edit', '/embed').replace('/view', '/embed');
+                      } else if (!embedUrl.includes('/embed')) {
+                        embedUrl = embedUrl + (embedUrl.includes('?') ? '&' : '?') + 'embedded=true';
+                      }
                       return (
                         <iframe
                           src={embedUrl}
